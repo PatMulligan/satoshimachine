@@ -5,7 +5,7 @@ from lnbits.core.services import websocket_updater
 from lnbits.tasks import register_invoice_listener
 
 from .crud import get_satoshimachine, update_satoshimachine
-from .models import CreateMyExtensionData
+from .models import CreateSatoshiMachineData
 
 #######################################
 ########## RUN YOUR TASKS HERE ########
@@ -26,13 +26,13 @@ async def wait_for_paid_invoices():
 
 
 async def on_invoice_paid(payment: Payment) -> None:
-    if payment.extra.get("tag") != "MyExtension":
+    if payment.extra.get("tag") != "SatoshiMachine":
         return
 
     satoshimachine_id = payment.extra.get("satoshimachineId")
     assert satoshimachine_id, "satoshimachineId not set in invoice"
     satoshimachine = await get_satoshimachine(satoshimachine_id)
-    assert satoshimachine, "MyExtension does not exist"
+    assert satoshimachine, "SatoshiMachine does not exist"
 
     # update something in the db
     if payment.extra.get("lnurlwithdraw"):
@@ -41,7 +41,7 @@ async def on_invoice_paid(payment: Payment) -> None:
         total = satoshimachine.total + payment.amount
 
     satoshimachine.total = total
-    await update_satoshimachine(CreateMyExtensionData(**satoshimachine.dict()))
+    await update_satoshimachine(CreateSatoshiMachineData(**satoshimachine.dict()))
 
     # here we could send some data to a websocket on
     # wss://<your-lnbits>/api/v1/ws/<satoshimachine_id> and then listen to it on

@@ -16,7 +16,7 @@ logger.debug(
 )
 
 
-satoshimachine_ext: APIRouter = APIRouter(prefix="/satoshimachine", tags=["MyExtension"])
+satoshimachine_ext: APIRouter = APIRouter(prefix="/satoshimachine", tags=["SatoshiMachine"])
 satoshimachine_ext.include_router(satoshimachine_generic_router)
 satoshimachine_ext.include_router(satoshimachine_api_router)
 satoshimachine_ext.include_router(satoshimachine_lnurl_router)

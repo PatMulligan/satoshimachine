@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class CreateMyExtensionData(BaseModel):
+class CreateSatoshiMachineData(BaseModel):
     id: Optional[str] = ""
     name: str
     lnurlpayamount: int
@@ -14,7 +14,7 @@ class CreateMyExtensionData(BaseModel):
     total: int = 0
 
 
-class MyExtension(BaseModel):
+class SatoshiMachine(BaseModel):
     id: str
     name: str
     lnurlpayamount: int

@@ -1,5 +1,5 @@
 {
-  "name": "MyExtension",
+  "name": "SatoshiMachine",
   "short_description": "Minimal extension to build on",
   "tile": "/satoshimachine/static/image/satoshimachine.png",
   "min_lnbits_version": "1.0.0",

@@ -65,7 +65,7 @@ async def api_lnurl_pay_cb(
         memo=satoshimachine.name,
         unhashed_description=f'[["text/plain", "{satoshimachine.name}"]]'.encode(),
         extra={
-            "tag": "MyExtension",
+            "tag": "SatoshiMachine",
             "satoshimachineId": satoshimachine_id,
             "extra": request.query_params.get("amount"),
         },
@@ -138,7 +138,7 @@ async def api_lnurl_withdraw_cb(
         payment_request=pr,
         max_sat=int(satoshimachine.lnurlwithdrawamount * 1000),
         extra={
-            "tag": "MyExtension",
+            "tag": "SatoshiMachine",
             "satoshimachineId": satoshimachine_id,
             "lnurlwithdraw": True,
         },

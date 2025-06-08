@@ -17,12 +17,12 @@ from .crud import (
     update_satoshimachine,
 )
 from .helpers import lnurler
-from .models import CreateMyExtensionData, CreatePayment, MyExtension
+from .models import CreateSatoshiMachineData, CreatePayment, SatoshiMachine
 
 satoshimachine_api_router = APIRouter()
 
 # Note: we add the lnurl params to returns so the links
-# are generated in the MyExtension model in models.py
+# are generated in the SatoshiMachine model in models.py
 
 ## Get all the records belonging to the user
 
@@ -31,7 +31,7 @@ satoshimachine_api_router = APIRouter()
 async def api_satoshimachines(
     req: Request,  # Withoutthe lnurl stuff this wouldnt be needed
     wallet: WalletTypeInfo = Depends(require_invoice_key),
-) -> list[MyExtension]:
+) -> list[SatoshiMachine]:
     wallet_ids = [wallet.wallet.id]
     user = await get_user(wallet.wallet.user)
     wallet_ids = user.wallet_ids if user else []
@@ -53,11 +53,11 @@ async def api_satoshimachines(
     "/api/v1/myex/{satoshimachine_id}",
     dependencies=[Depends(require_invoice_key)],
 )
-async def api_satoshimachine(satoshimachine_id: str, req: Request) -> MyExtension:
+async def api_satoshimachine(satoshimachine_id: str, req: Request) -> SatoshiMachine:
     myex = await get_satoshimachine(satoshimachine_id)
     if not myex:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="MyExtension does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="SatoshiMachine does not exist."
         )
     # Populate lnurlpay and lnurlwithdraw.
     # Without the lnurl stuff this wouldnt be needed.
@@ -73,9 +73,9 @@ async def api_satoshimachine(satoshimachine_id: str, req: Request) -> MyExtensio
 @satoshimachine_api_router.post("/api/v1/myex", status_code=HTTPStatus.CREATED)
 async def api_satoshimachine_create(
     req: Request,  # Withoutthe lnurl stuff this wouldnt be needed
-    data: CreateMyExtensionData,
+    data: CreateSatoshiMachineData,
     wallet: WalletTypeInfo = Depends(require_admin_key),
-) -> MyExtension:
+) -> SatoshiMachine:
     myex = await create_satoshimachine(data)
 
     # Populate lnurlpay and lnurlwithdraw.
@@ -92,19 +92,19 @@ async def api_satoshimachine_create(
 @satoshimachine_api_router.put("/api/v1/myex/{satoshimachine_id}")
 async def api_satoshimachine_update(
     req: Request,  # Withoutthe lnurl stuff this wouldnt be needed
-    data: CreateMyExtensionData,
+    data: CreateSatoshiMachineData,
     satoshimachine_id: str,
     wallet: WalletTypeInfo = Depends(require_admin_key),
-) -> MyExtension:
+) -> SatoshiMachine:
     myex = await get_satoshimachine(satoshimachine_id)
     if not myex:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="MyExtension does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="SatoshiMachine does not exist."
         )
 
     if wallet.wallet.id != myex.wallet:
         raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN, detail="Not your MyExtension."
+            status_code=HTTPStatus.FORBIDDEN, detail="Not your SatoshiMachine."
         )
 
     for key, value in data.dict().items():
@@ -131,12 +131,12 @@ async def api_satoshimachine_delete(
 
     if not myex:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="MyExtension does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="SatoshiMachine does not exist."
         )
 
     if myex.wallet != wallet.wallet.id:
         raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN, detail="Not your MyExtension."
+            status_code=HTTPStatus.FORBIDDEN, detail="Not your SatoshiMachine."
         )
 
     await delete_satoshimachine(satoshimachine_id)
@@ -154,7 +154,7 @@ async def api_satoshimachine_create_invoice(data: CreatePayment) -> dict:
 
     if not satoshimachine:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="MyExtension does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="SatoshiMachine does not exist."
         )
 
     # we create a payment and add some tags,

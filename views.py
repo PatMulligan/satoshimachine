@@ -42,7 +42,7 @@ async def satoshimachine(req: Request, satoshimachine_id):
     myex = await get_satoshimachine(satoshimachine_id)
     if not myex:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="MyExtension does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="SatoshiMachine does not exist."
         )
     return satoshimachine_renderer().TemplateResponse(
         "satoshimachine/satoshimachine.html",
@@ -63,7 +63,7 @@ async def manifest(satoshimachine_id: str):
     satoshimachine = await get_satoshimachine(satoshimachine_id)
     if not satoshimachine:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="MyExtension does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="SatoshiMachine does not exist."
         )
 
     return {

@@ -49,7 +49,7 @@ window.app = Vue.createApp({
       this.formDialog.show = false
       this.formDialog.data = {}
     },
-    async getMyExtensions() {
+    async getSatoshiMachines() {
       await LNbits.api
         .request(
           'GET',
@@ -63,7 +63,7 @@ window.app = Vue.createApp({
           LNbits.utils.notifyApiError(err)
         })
     },
-    async sendMyExtensionData() {
+    async sendSatoshiMachineData() {
       const data = {
         name: this.formDialog.data.name,
         lnurlwithdrawamount: this.formDialog.data.lnurlwithdrawamount,
@@ -75,13 +75,13 @@ window.app = Vue.createApp({
       if (this.formDialog.data.id) {
         data.id = this.formDialog.data.id
         data.total = this.formDialog.data.total
-        await this.updateMyExtension(wallet, data)
+        await this.updateSatoshiMachine(wallet, data)
       } else {
-        await this.createMyExtension(wallet, data)
+        await this.createSatoshiMachine(wallet, data)
       }
     },
 
-    async updateMyExtensionForm(tempId) {
+    async updateSatoshiMachineForm(tempId) {
       const satoshimachine = _.findWhere(this.myex, {id: tempId})
       this.formDialog.data = {
         ...satoshimachine
@@ -94,7 +94,7 @@ window.app = Vue.createApp({
       }
       this.formDialog.show = true
     },
-    async createMyExtension(wallet, data) {
+    async createSatoshiMachine(wallet, data) {
       data.wallet = wallet.id
       await LNbits.api
         .request('POST', '/satoshimachine/api/v1/myex', wallet.adminkey, data)
@@ -107,7 +107,7 @@ window.app = Vue.createApp({
         })
     },
 
-    async updateMyExtension(wallet, data) {
+    async updateSatoshiMachine(wallet, data) {
       data.wallet = wallet.id
       await LNbits.api
         .request(
@@ -125,13 +125,13 @@ window.app = Vue.createApp({
           LNbits.utils.notifyApiError(error)
         })
     },
-    async deleteMyExtension(tempId) {
+    async deleteSatoshiMachine(tempId) {
       var satoshimachine = _.findWhere(this.myex, {id: tempId})
       const wallet = _.findWhere(this.g.user.wallets, {
         id: satoshimachine.wallet
       })
       await LNbits.utils
-        .confirmDialog('Are you sure you want to delete this MyExtension?')
+        .confirmDialog('Are you sure you want to delete this SatoshiMachine?')
         .onOk(function () {
           LNbits.api
             .request(
@@ -194,7 +194,7 @@ window.app = Vue.createApp({
       const data = {
         satoshimachine_id: tempid,
         amount: this.invoiceAmount,
-        memo: 'MyExtension - ' + myex.name
+        memo: 'SatoshiMachine - ' + myex.name
       }
       await LNbits.api
         .request('POST', `/satoshimachine/api/v1/myex/payment`, wallet.inkey, data)
@@ -237,6 +237,6 @@ window.app = Vue.createApp({
   //////LIFECYCLE FUNCTIONS RUNNING ON PAGE LOAD/////
   ///////////////////////////////////////////////////
   async created() {
-    await this.getMyExtensions()
+    await this.getSatoshiMachines()
   }
 })
