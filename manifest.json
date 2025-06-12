@@ -1,0 +1,14 @@
+{
+  "name": "DCA Admin",
+  "short_description": "Admin interface for Dollar Cost Averaging service",
+  "tile": "/dca_admin/static/images/logo.png",
+  "contributors": ["PatMulligan"],
+  "hidden": false,
+  "repos": [
+    {
+      "id": "dca_admin",
+      "organisation": "PatMulligan",
+      "repository": "lnbits-extensions"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+## Database & Integration Questions
+Database Access: How will the admin extension connect to the external Postgres database?
+we can fetch a csv. here is script that illustrates how to do that
+```bash
+#!/usr/bin/env bash
+# This script fetches transaction data from the ATM server
+
+# Load environment variables
+if [ -f .env ]; then
+    set -o allexport
+    source .env
+    set +o allexport
+fi
+
+# Ensure required environment variables are set
+if [ -z "$SERVER_IP" ] || [ -z "$SERVER_LOG_DIR" ] || [ -z "$OLD_SERVER_LOG_DIR" ]; then
+    echo "Error: Environment variables SERVER_IP, SERVER_LOG_DIR, and OLD_SERVER_LOG_DIR must be set"
+    exit 1
+fi
+
+# Create required directories
+for dir in "${SERVER_LOG_DIR}" "${OLD_SERVER_LOG_DIR}"; do
+  if [ ! -d "$dir" ]; then
+    mkdir -p "$dir"
+    echo "Created directory: $dir"
+  fi
+done
+
+# File names
+CASH_OUT_FILE=cash_out_txs
+CASH_IN_FILE=cash_in_txs
+OUT_ACTIONS_FILE=cash_out_actions
+
+# Archive existing files
+for file in $CASH_OUT_FILE $CASH_IN_FILE $OUT_ACTIONS_FILE; do
+  if [ -f "${SERVER_LOG_DIR}/${file}.csv" ]; then
+    timestamp=$(date -Iseconds | sed 's/+00:00//')
+    new_file="${file}_${timestamp}"
+    echo "${file}.csv found, moving to ${OLD_SERVER_LOG_DIR}/${new_file}.csv"
+    mv "${SERVER_LOG_DIR}/${file}.csv" "${OLD_SERVER_LOG_DIR}/${new_file}.csv"
+  else
+    echo "No previous ${file}.csv exists"
+  fi
+done
+
+# Fetch new data from server
+echo "Fetching transaction data from ${SERVER_IP}..."
+
+# Execute remote commands to export data
+ssh root@${SERVER_IP} export-cash-out
+ssh root@${SERVER_IP} export-cash-in
+ssh root@${SERVER_IP} export-out-actions
+
+# Download exported files
+scp root@${SERVER_IP}:/tmp/cash_out_txs.csv "${SERVER_LOG_DIR}/${CASH_OUT_FILE}.csv"
+scp root@${SERVER_IP}:/tmp/cash_in_txs.csv "${SERVER_LOG_DIR}/${CASH_IN_FILE}.csv"
+scp root@${SERVER_IP}:/tmp/cash_out_actions.csv "${SERVER_LOG_DIR}/${OUT_ACTIONS_FILE}.csv"
+
+# Print summary
+echo ""
+echo "Transaction summary:"
+echo "===================="
+echo "Last transaction OUT:"
+tail --lines=1 "${SERVER_LOG_DIR}/${CASH_OUT_FILE}.csv"
+echo ""
+echo "Last transaction IN:"
+tail --lines=1 "${SERVER_LOG_DIR}/${CASH_IN_FILE}.csv"
+echo ""
+```
+Alternately, we connect to the postgres database remotely. *DEFINITELY* read-only. That might actually be better than fetching a csv each time 
+
+Connection credentials management
+Read-only vs read-write access
+n/a since we will fetch a csv
+
+Network security considerations
+Business Logic Questions
+Flow Mode Distribution: In the example, when a layperson sells 2,000 GTQ worth of BTC:
+
+How is the proportional distribution calculated exactly?
+this part still requires some attention. The idea is that if once client has, e.g., 9,000 GTQ in the machine and another client has, e.g., 1,000 GTQ in the machine, then the first one should get 90% of the sats (called crypto atoms in the database table)
+
+Fixed Mode Timing: For Fixed Mode distributions:
+Should this be configurable per client or system-wide?
+This will be fixed system-wide by the admin for now
+
+What happens if there's insufficient funds for a fixed distribution?
+There should never be insufficient funds... however we should treat this case... there is a way of "topping up" a wallet in lnbits, so we could technically top up the wallet to the exact amount needed, but i'm not sure if that's best practice. I am open to ideas. Otherwise in case of failure, we could send a message over the messaging protocol which is nostr.
+
+Should there be a maximum daily limit per client?
+yes the maximum will be 2000 GTQ
+
+Technical Architecture Questions
+Extension Relationship: Should the admin and client extensions:
+Share a database/data models?
+Good question, it is possible that the admin database holds all of the relevant information. The admin extension has to be active for the system to work, so that seems like a good way to make sure that the system is running. The client extension can then hit internal API endpoints to populate the admin database with DCA parameters for each client. 
+
+Real-time Updates: For the client dashboard:
+Should updates be real-time (WebSocket) or polling-based?
+whichever you recommend for this scenarios.
+
+How critical is immediate notification of new DCA transactions?
+If you are talking about DCA transactions to the client, then we do not have to worry about that as they are handled by the lnbits software. 
+
+Authentication: For the client extension:
+How do you identify which LNBits user corresponds to which DCA client?
+Great question. So in the client extension, the user will choose which wallet they want to receive DCA's to upon intitation. This is standard with LNBits extensions that you choose a wallet. I think for this extension, after the wallet it chosen, we probably don't want to let them change it unless they re-initiate so as to keep all their transactions together. The question is how will their desposit of money to start the DCA will be verified. For now I will probably handle it on the admin side, i.e., I will input their user_id (their associated DCA wallet will then be retrieved from the database, this is important in case they change their associated wallet), amount, DCA method (and daily amount if fixed DCA).
+
+Is there a separate registration process for DCA clients?
+No, there is no special registration process. Likely the admin will install the DCA client extension manually on their account and they will have access to interact with it.
+
+
+Let me know if you have any questions! take a moment to look at the example extension in this current project that we will be overwriting

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+  {{ window_vars(user) }}
+  
+  <!-- Component templates -->
+  <template id="transaction-list">
+    {% include("dca_admin/components/transaction-list.html") %}
+  </template>
+  
+  <template id="transaction-details">
+    {% include("dca_admin/components/transaction-details.html") %}
+  </template>
+  
+  <!-- App initialization -->
+  <script src="{{ static_url_for('dca_admin/static', 'js/transactions.js') }}"></script>
+  
+  <!-- Component registrations -->
+  <script src="{{ static_url_for('dca_admin/static', 'js/components/transaction-list.js') }}"></script>
+  <script src="{{ static_url_for('dca_admin/static', 'js/components/transaction-details.js') }}"></script>
+{% endblock %}
+
+{% block page %}
+  <div class="row q-col-gutter-md">
+    <!-- Transaction List -->
+    <div class="col-12">
+      <q-card class="bg-marginal-bg">
+        <q-card-section class="row items-center">
+          <div class="text-h6">Transaction History</div>
+          <q-space></q-space>
+          <q-btn
+            color="primary"
+            icon="refresh"
+            label="Refresh"
+            :loading="loading"
+            @click="loadTransactions"
+          ></q-btn>
+        </q-card-section>
+        
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <!-- Filters -->
+            <div class="col-12 col-md-4">
+              <q-input
+                v-model="filters.search"
+                label="Search"
+                dense
+                outlined
+                clearable
+              >
+                <template v-slot:append>
+                  <q-icon name="search"></q-icon>
+                </template>
+              </q-input>
+            </div>
+            
+            <div class="col-12 col-md-4">
+              <q-select
+                v-model="filters.status"
+                :options="statusOptions"
+                label="Status"
+                dense
+                outlined
+                clearable
+              ></q-select>
+            </div>
+            
+            <div class="col-12 col-md-4">
+              <q-select
+                v-model="filters.type"
+                :options="typeOptions"
+                label="Type"
+                dense
+                outlined
+                clearable
+              ></q-select>
+            </div>
+          </div>
+        </q-card-section>
+        
+        <q-card-section>
+          <transaction-list
+            :transactions="filteredTransactions"
+            :loading="loading"
+            @view="showDetails"
+          ></transaction-list>
+        </q-card-section>
+      </q-card>
+    </div>
+  </div>
+
+  <!-- Transaction Details Dialog -->
+  <q-dialog v-model="showDetailsDialog">
+    <q-card style="min-width: 350px">
+      <q-card-section>
+        <div class="text-h6">Transaction Details</div>
+      </q-card-section>
+
+      <q-card-section>
+        <transaction-details
+          :transaction="selectedTransaction"
+          :loading="loading"
+        ></transaction-details>
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn flat label="Close" color="primary" v-close-popup></q-btn>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+{% endblock %} 

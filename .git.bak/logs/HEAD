@@ -1,0 +1,15 @@
+0000000000000000000000000000000000000000 a88ede1e783a0ebdef7eb656d19ba6a376a68eb0 Patrick Mulligan <PatJMulligan@protonmail.com> 1749386410 +0200	commit (initial): initial commit
+a88ede1e783a0ebdef7eb656d19ba6a376a68eb0 0000000000000000000000000000000000000000 Patrick Mulligan <PatJMulligan@protonmail.com> 1749386816 +0200	Branch: renamed refs/heads/main to refs/heads/main
+a88ede1e783a0ebdef7eb656d19ba6a376a68eb0 a88ede1e783a0ebdef7eb656d19ba6a376a68eb0 Patrick Mulligan <PatJMulligan@protonmail.com> 1749386816 +0200	Branch: renamed refs/heads/main to refs/heads/main
+a88ede1e783a0ebdef7eb656d19ba6a376a68eb0 ce870233f65466f04bcc7a2c48a96ebe2b33288a Patrick Mulligan <PatJMulligan@protonmail.com> 1749388681 +0200	commit: update
+ce870233f65466f04bcc7a2c48a96ebe2b33288a 8f8c881fbcc3283c77f0da43fbce2acf0eb84a5f Patrick Mulligan <PatJMulligan@protonmail.com> 1749388993 +0200	commit: update logo
+8f8c881fbcc3283c77f0da43fbce2acf0eb84a5f 4489c405d2582a737aeeb5554ed26cda3ffaf4c0 Patrick Mulligan <PatJMulligan@protonmail.com> 1749389200 +0200	commit: make 128x128
+4489c405d2582a737aeeb5554ed26cda3ffaf4c0 ce870233f65466f04bcc7a2c48a96ebe2b33288a Patrick Mulligan <PatJMulligan@protonmail.com> 1749389205 +0200	rebase (start): checkout ce870233f65466f04bcc7a2c48a96ebe2b33288a
+ce870233f65466f04bcc7a2c48a96ebe2b33288a 8f8c881fbcc3283c77f0da43fbce2acf0eb84a5f Patrick Mulligan <PatJMulligan@protonmail.com> 1749389205 +0200	rebase: fast-forward
+8f8c881fbcc3283c77f0da43fbce2acf0eb84a5f 36a10c0f5b78558c2589dedfeb43a2ab7857ae79 Patrick Mulligan <PatJMulligan@protonmail.com> 1749389205 +0200	rebase (squash): update logo
+36a10c0f5b78558c2589dedfeb43a2ab7857ae79 36a10c0f5b78558c2589dedfeb43a2ab7857ae79 Patrick Mulligan <PatJMulligan@protonmail.com> 1749389205 +0200	rebase (finish): returning to refs/heads/main
+36a10c0f5b78558c2589dedfeb43a2ab7857ae79 2f47ac3ecaea28e8a62495052cf69004f801555d Patrick Mulligan <PatJMulligan@protonmail.com> 1749628757 +0200	commit: add cursor rules
+2f47ac3ecaea28e8a62495052cf69004f801555d a5a8d8e1bd9f1ea8a2526697b8e3f9ab33784cad Patrick Mulligan <PatJMulligan@protonmail.com> 1749628769 +0200	commit: optimize cursor rules with claude
+a5a8d8e1bd9f1ea8a2526697b8e3f9ab33784cad b916e97d593ff54b7b03c09f61194af5743c49b0 Patrick Mulligan <PatJMulligan@protonmail.com> 1749653970 +0200	commit: update cursor rules; magical g etc
+b916e97d593ff54b7b03c09f61194af5743c49b0 77e7021257ed35c46781e377289f9a1c1c472558 Patrick Mulligan <PatJMulligan@protonmail.com> 1749718308 +0200	commit: enhance cursor rules with websocket patterns and utility tools; add DCA system specifications and client/admin extension details
+77e7021257ed35c46781e377289f9a1c1c472558 f658fa24ca765ebdd829ba92bba29a7f976f0575 Patrick Mulligan <PatJMulligan@protonmail.com> 1749718323 +0200	commit: Implement DCA Admin Extension: Add CRUD operations, API endpoints, and frontend templates for managing DCA clients, commissions, and transactions. Update database schema and models to support new features.

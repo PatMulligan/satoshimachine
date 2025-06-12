@@ -1,0 +1,537 @@
+// LNBits Extension Development Rules - Vue 3 Options API + Quasar v2.17.0
+
+// === CORE PRINCIPLES ===
+const corePrinciples = [
+    "Follow LNBits extension structure and naming conventions (snake_case)",
+    "Use Vue 3 Options API pattern consistently",
+    "Make API calls directly using LNbits.api.request (not separate services)",
+    "Use Quasar components for UI consistency with LNBits core",
+    "Implement proper loading states and error handling",
+    "Never mix Jinja2 {{ }} syntax with Vue component templates"
+];
+
+// === TEMPLATE SYNTAX RULES ===
+const templateRules = [
+    // Vue.js components: NEVER use {{ }} interpolation
+    "Use v-text='value' instead of {{ value }}",
+    "Use :attribute='value' for binding",
+    "Use v-html='value' for HTML content",
+    "Keep all JavaScript expressions inside Vue directives",
+    "Use computed properties for complex template logic",
+    
+    // Jinja2 only in index.html
+    "Use {{ }} and {% %} only in index.html files",
+    "Component templates must be pure Vue.js without Jinja2"
+];
+
+// === FILE STRUCTURE ===
+const fileStructure = `
+your_extension_name/
+├── __init__.py              # Extension initialization
+├── migrations.py            # Database migrations
+├── models.py               # Data models
+├── crud.py                 # Database operations
+├── views.py                # Frontend routes
+├── views_api.py            # API routes
+├── config.json             # Extension config
+├── manifest.json           # Extension manifest
+├── static/
+│   ├── js/
+│   │   ├── index.js        # Main Vue app
+│   │   └── components/     # Component JS files
+│   ├── css/style.css       # Extension styles
+│   └── images/             # Assets
+└── templates/
+    └── your_extension_name/
+        ├── index.html      # Main template
+        └── components/     # Component HTML templates
+`;
+
+// === VUE APP INITIALIZATION ===
+const appInitPattern = `
+// index.js - Main Vue app
+window.app = Vue.createApp({
+  el: '#vue',
+  mixins: [windowMixin],
+  
+  data() {
+    return {
+      loading: false,
+      // Extension state
+    }
+  },
+
+  computed: {
+    // Computed properties
+  },
+
+  methods: {
+    async apiCall() {
+      try {
+        const {data} = await LNbits.api.request(
+          'GET',
+          '/extension/api/v1/endpoint',
+          this.g.user.wallets[0].inkey
+        )
+        this.$q.notify({
+          type: 'positive',
+          message: 'Success',
+          timeout: 5000
+        })
+      } catch (error) {
+        LNbits.utils.notifyApiError(error)
+      }
+    }
+  },
+
+  created() {
+    // Initialize extension
+  }
+})`;
+
+// === COMPONENT REGISTRATION ===
+const componentPattern = `
+// Component registration
+window.app.component('component-name', {
+  name: 'ComponentName',
+  template: '#component-template',
+  
+  props: {
+    value: {
+      type: String,
+      required: true
+    }
+  },
+  
+  data() {
+    return {
+      loading: false
+    }
+  },
+  
+  methods: {
+    async handleAction() {
+      // Component methods
+    }
+  }
+})`;
+
+// === TEMPLATE ORGANIZATION ===
+const templateOrganization = `
+<!-- index.html -->
+{% extends "base.html" %}
+
+{% block scripts %}
+  {{ window_vars(user) }}
+  
+  <!-- Component templates BEFORE scripts -->
+  <template id="component-one">
+    {% include("extension/components/component-one.html") %}
+  </template>
+  
+  <!-- App initialization -->
+  <script src="{{ static_url_for('extension/static', 'js/index.js') }}"></script>
+  
+  <!-- Component registrations -->
+  <script src="{{ static_url_for('extension/static', 'js/components/component-one.js') }}"></script>
+{% endblock %}
+
+{% block page %}
+  <div class="row q-col-gutter-md">
+    <!-- Extension content -->
+  </div>
+{% endblock %}`;
+
+// === MAGICAL G OBJECT ===
+const magicalGObject = `
+// The Global G Object - Available as this.g throughout the app
+const gObjectStructure = {
+  // Application state
+  offline: boolean,                    // Application offline status
+  visibleDrawer: boolean,              // Navigation drawer visibility
+  extensions: string[],                // Installed extensions array
+  
+  // User object with complete wallet information
+  user: {
+    id: string,                        // Unique user identifier
+    admin: boolean,                    // Admin privileges
+    email: string | null,              // User email
+    extensions: string[],              // User's enabled extensions
+    super_user: boolean,               // Super user privileges
+    
+    // Wallet array with full details
+    wallets: [{
+      id: string,                      // Wallet identifier
+      name: string,                    // Display name
+      adminkey: string,                // Admin key for operations
+      inkey: string,                   // Invoice key for receiving
+      currency: string,                // Default currency (USD, EUR, etc)
+      msat: number,                    // Balance in millisatoshis
+      sat: number,                     // Balance in satoshis
+      fsat: string,                    // Formatted satoshi balance
+      url: string,                     // Direct wallet access URL
+      extra: {
+        icon: string,                  // Wallet icon
+        color: string,                 // Color theme
+        pinned: boolean                // Pinned status
+      }
+    }],
+    
+    // Additional user data
+    extra: {
+      email_verified: boolean,
+      first_name: string | null,
+      last_name: string | null,
+      display_name: string | null,
+      picture: string | null,
+      provider: string,                // Auth provider
+      visible_wallet_count: number
+    },
+    
+    // Convenience arrays
+    walletOptions: [{                  // For dropdowns
+      label: string,                   // Display text
+      value: string                    // Wallet ID
+    }],
+    hiddenWalletsCount: number
+  },
+  
+  // Current wallet and financial data
+  wallet: object,                      // Currently selected wallet
+  fiatBalance: number,                 // Current fiat balance
+  exchangeRate: number,                // Current exchange rate
+  fiatTracking: boolean,               // Fiat tracking enabled
+  
+  // System arrays and settings
+  wallets: object[],                   // Global wallets
+  payments: object[],                  // Payments array
+  allowedThemes: string[],             // Available UI themes
+  langs: object[],                     // Supported languages
+  walletEventListeners: string[],      // Active listeners
+  updatePayments: boolean,             // Payment update trigger
+  updatePaymentsHash: string           // Update tracking hash
+}
+
+// Common usage patterns
+// Access wallet keys: this.g.user.wallets[0].inkey
+// Check admin status: this.g.user.admin
+// Get wallet options: this.g.user.walletOptions
+// Current balance: this.g.wallet.sat`;
+
+// === WEBSOCKET PATTERNS ===
+const websocketPatterns = `
+// WebSocket Implementation for Real-time Updates
+// FastAPI includes a great websocket tool
+// LNBits extensions like Copilot and LNURLDevices use a "weird and useful websocket/GET tool"
+
+// 1. LNBits WebSocket/GET Hybrid Tool
+// Subscribe: wss://127.0.0.1/api/v1/ws/{SOME-ID}
+// Post: http://127.0.0.1/api/v1/ws/{SOME-ID}/{THE-DATA-YOU-WANT-TO-POST}
+
+// 2. Protocol Detection and URL Building
+const initWebSocket = async function() {
+  let localUrl
+  if (location.protocol !== 'https:') {
+    localUrl = 'ws://' + 
+      document.domain + 
+      ':' + 
+      location.port + 
+      '/api/v1/ws/32872r23g29'
+  } else {
+    localUrl = 'wss://' + 
+      document.domain + 
+      ':' + 
+      location.port + 
+      '/api/v1/ws/32872r23g29'
+  }
+  
+  const ws = new WebSocket(localUrl)
+  ws.addEventListener('message', async (data) => {
+    const res = data.toString()
+    document.getElementById('text-to-change').innerHTML = res
+  })
+}
+
+// 3. Standard WebSocket Pattern
+const wsUrl = \`wss://\${location.host}/api/v1/ws/\${SOME_ID}\`
+const socket = new WebSocket(wsUrl)
+
+socket.onmessage = (event) => {
+  const data = JSON.parse(event.data)
+  // Handle real-time updates
+  this.updateData(data)
+}
+
+// 4. Post data to WebSocket endpoint (LNBits hybrid approach)
+const postToWebSocket = async (id, data) => {
+  const response = await fetch(
+    \`\${location.protocol}//\${location.host}/api/v1/ws/\${id}/\${encodeURIComponent(data)}\`
+  )
+  return response.json()
+}
+
+// 5. FastAPI WebSocket endpoint example
+@extension_ext.websocket("/ws/{item_id}")
+async def websocket_endpoint(websocket: WebSocket, item_id: str):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"Message: {data}")
+    except WebSocketDisconnect:
+        pass
+
+// Use cases: Real-time updates (Copilot extension), device communication (LNURLDevices)`;
+
+// === UTILITY TOOLS ===
+const utilityTools = `
+// Built-in LNBits Utility Tools
+
+// 1. Exchange Rates (streams from 6 different sources)
+// API Endpoints:
+// - GET /api/v1/currencies (list available currencies)
+// - POST /api/v1/conversion (convert between currencies)
+
+// Python functions for server-side conversion
+from lnbits.utils.exchange_rates import fiat_amount_as_satoshis, get_fiat_rate_satoshis, satoshis_amount_as_fiat
+
+// ConversionData structure: {from_: str, amount: float, to: str}
+
+// Frontend conversion examples
+const getAvailableCurrencies = async () => {
+  const {data} = await LNbits.api.request(
+    'GET', 
+    '/api/v1/currencies',
+    this.g.user.wallets[0].inkey
+  )
+  return data
+}
+
+const convertFiatToSats = async (amount, fromCurrency) => {
+  const {data} = await LNbits.api.request(
+    'POST', 
+    '/api/v1/conversion',
+    this.g.user.wallets[0].inkey,
+    {from_: fromCurrency, amount: amount, to: 'sat'}
+  )
+  return data.sats
+}
+
+const convertSatsToFiat = async (satsAmount, toCurrency) => {
+  const {data} = await LNbits.api.request(
+    'POST', 
+    '/api/v1/conversion',
+    this.g.user.wallets[0].inkey,
+    {from_: 'sat', amount: satsAmount, to: toCurrency}
+  )
+  return data.amount
+}
+
+// 2. QR Code Generation
+// Method 1: Quasar VueQrcode (recommended)
+// Component registration (usually done globally)
+Vue.component(VueQrcode.name, VueQrcode)
+
+// Template usage
+<qrcode 
+  :value="qrCodeDialog.data.bip21" 
+  :options="{width: 800}" 
+  class="rounded-borders"
+></qrcode>
+
+// Alternative syntax
+<vue-qrcode :value="qrData" :options="{ width: 200 }" />
+
+// Method 2: LNBits API endpoint
+const qrCodeUrl = '/api/v1/qrcode/' + encodeURIComponent(data)
+// Example: /api/v1/qrcode/some-data-you-want-in-a-qrcode
+
+// Using as img tag
+<img 
+  class="bg-white" 
+  width="300px" 
+  src="/api/v1/qrcode/some-data-you-want-in-a-qrcode" 
+/>
+
+// 3. Asset Management
+// Static file serving pattern
+const assetUrl = "{{ static_url_for('extension_name/static', 'images/logo.png') }}"
+
+// 4. Notification Utilities
+// Built-in notification methods
+LNbits.utils.notifyApiError(error)           // API error handling
+LNbits.utils.confirmDialog('Message')        // Confirmation dialogs
+this.$q.notify({type: 'positive', message: 'Success'})  // Success notifications`;
+
+// === QUASAR BEST PRACTICES ===
+const quasarPractices = [
+    "Use QBtn, QInput, QSelect, QCard, QTable for consistency",
+    "Implement QDialog for modals and confirmations",
+    "Use QSpinner/QSkeleton for loading states",
+    "Leverage $q.notify for user feedback",
+    "Respect $q.dark.isActive for theme consistency",
+    "Use Quasar CSS utility classes",
+    "Follow existing LNBits UI patterns"
+];
+
+// === API PATTERNS ===
+const apiPatterns = [
+    "Always include wallet key (inkey/adminkey) as third parameter",
+    "Use try/catch with LNbits.utils.notifyApiError for errors",
+    "Destructure response: const {data} = await LNbits.api.request(...)",
+    "Use proper HTTP methods (GET, POST, PUT, DELETE)",
+    "Group related API calls into logical methods"
+];
+
+// === PYTHON API EXAMPLE ===
+const pythonApiExample = `
+# views_api.py
+from fastapi import Depends
+from lnbits.decorators import require_admin_key
+
+@extension_name_ext.get("/api/v1/records")
+async def api_get_records(
+    wallet: WalletTypeInfo = Depends(require_admin_key),
+):
+    records = await get_records(wallet.wallet.id)
+    return [record.dict() for record in records]
+
+@extension_name_ext.post("/api/v1/record")
+async def api_create_record(
+    data: CreateRecordData,
+    wallet: WalletTypeInfo = Depends(require_admin_key)
+):
+    record = await create_record(wallet_id=wallet.wallet.id, data=data)
+    return record.dict()`;
+
+// === NOTIFICATION PATTERNS ===
+const notificationPatterns = `
+// Success notification
+this.$q.notify({
+  type: 'positive',
+  message: 'Operation successful',
+  timeout: 5000
+})
+
+// Error handling
+try {
+  // API call
+} catch (error) {
+  LNbits.utils.notifyApiError(error)
+}
+
+// Confirmation dialog
+LNbits.utils
+  .confirmDialog('Are you sure?')
+  .onOk(() => {
+    // Action on confirmation
+  })`;
+
+// === FORM VALIDATION EXAMPLE ===
+const formValidationExample = `
+// Quasar form with validation
+<q-form ref="form" @submit.prevent="onSubmit">
+  <q-input
+    v-model="form.name"
+    label="Name"
+    :rules="[val => !!val || 'Name is required']"
+    outlined
+    dense
+  />
+  <q-btn
+    label="Submit"
+    type="submit"
+    color="primary"
+    :loading="loading"
+  />
+</q-form>`;
+
+// === FASTAPI BEST PRACTICES ===
+const fastApiPractices = [
+    "Use LNBits core endpoints primarily, avoid inter-extension dependencies",
+    "Auto-generated Swagger UI available at /docs for testing",
+    "Implement proper error handling with FastAPI exceptions",
+    "Use Pydantic models for request/response validation",
+    "Leverage FastAPI dependency injection for wallet authentication",
+    "Follow RESTful API design principles",
+    "Use async/await for database operations"
+];
+
+// === OFFICIAL RESOURCES ===
+const officialResources = `
+// Official LNBits Resources
+
+// 1. GitHub Repositories
+// Main LNBits: https://github.com/lnbits/lnbits
+// Extensions: https://github.com/lnbits/lnbits-extensions
+// Submit extensions via lnbits-extensions repo
+
+// 2. Learning Resources
+// LNBits YouTube: https://www.youtube.com/channel/UCGXU2Ae5x5K-5aKdmKqoLYg
+// Makerbits YouTube: https://www.youtube.com/@makerbits7700
+// Hardware integration and project examples
+
+// 3. Framework Documentation
+// FastAPI: https://fastapi.tiangolo.com/
+// Quasar: https://quasar.dev/
+// Vue.js: https://vuejs.org/
+
+// 4. Development Tools
+// Study existing extension templates for patterns
+// Use browser DevTools for debugging Vue components
+// Test with FastAPI /docs for API validation`;
+
+// === COMMON MISTAKES TO AVOID ===
+const avoidMistakes = [
+    "❌ Never use {{ }} in Vue component templates",
+    "❌ Don't mix Jinja2 expressions with Vue directives",
+    "❌ Don't forget wallet keys in API requests",
+    "❌ Don't use plain HTML when Quasar components exist",
+    "❌ Don't skip loading states for async operations",
+    "❌ Don't forget try/catch for API calls",
+    "❌ Don't register components after app mount",
+    "❌ Don't ignore the magical G object for user/wallet data",
+    "❌ Don't implement custom WebSocket when LNBits has built-in support",
+    "❌ Don't recreate QR generation when API endpoint exists"
+];
+
+// === CHECKLIST FOR NEW EXTENSIONS ===
+const extensionChecklist = [
+    "✅ Follow snake_case naming convention",
+    "✅ Implement proper file structure",
+    "✅ Use Vue 3 Options API consistently",
+    "✅ Register components before app mount",
+    "✅ Include component templates before scripts",
+    "✅ Use v-text/v-bind instead of {{ }} in components",
+    "✅ Implement loading states with Quasar components",
+    "✅ Add proper error handling with notifications",
+    "✅ Use wallet keys in API requests",
+    "✅ Follow Quasar UI patterns for consistency",
+    "✅ Leverage magical G object for user/wallet data",
+    "✅ Use built-in utilities (QR codes, exchange rates)",
+    "✅ Implement WebSocket for real-time features when needed",
+    "✅ Study existing extensions for best practices"
+];
+
+// === RESPONSIVE DESIGN ===
+const responsiveRules = [
+    "Extension renders inside q-page with padding: q-px-md q-py-lg",
+    "Use $q.screen utilities for responsive breakpoints",
+    "Respect parent dark/light mode via $q.dark.isActive",
+    "Use bg-marginal-bg class for headers",
+    "Follow parent spacing patterns (q-pa-*, q-ma-*)"
+];
+
+// === DEBUGGING TIPS ===
+const debuggingTips = [
+    "Check browser console for template syntax errors",
+    "Verify component registration order (templates → app → components)",
+    "Ensure API endpoints return proper JSON responses",
+    "Use Vue DevTools for component inspection",
+    "Test dark/light mode switching",
+    "Verify wallet key permissions for API calls",
+    "Use FastAPI /docs for API endpoint testing",
+    "Inspect this.g object in browser console for available data",
+    "Test WebSocket connections with browser developer tools",
+    "Validate QR code generation with different data types"
+];

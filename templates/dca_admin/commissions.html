@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+  {{ window_vars(user) }}
+  
+  <!-- Component templates -->
+  <template id="recipient-list">
+    {% include("dca_admin/components/recipient-list.html") %}
+  </template>
+  
+  <template id="recipient-form">
+    {% include("dca_admin/components/recipient-form.html") %}
+  </template>
+  
+  <template id="distribution-list">
+    {% include("dca_admin/components/distribution-list.html") %}
+  </template>
+  
+  <!-- App initialization -->
+  <script src="{{ static_url_for('dca_admin/static', 'js/commissions.js') }}"></script>
+  
+  <!-- Component registrations -->
+  <script src="{{ static_url_for('dca_admin/static', 'js/components/recipient-list.js') }}"></script>
+  <script src="{{ static_url_for('dca_admin/static', 'js/components/recipient-form.js') }}"></script>
+  <script src="{{ static_url_for('dca_admin/static', 'js/components/distribution-list.js') }}"></script>
+{% endblock %}
+
+{% block page %}
+  <div class="row q-col-gutter-md">
+    <!-- Commission Recipients -->
+    <div class="col-12 col-md-6">
+      <q-card class="bg-marginal-bg">
+        <q-card-section class="row items-center">
+          <div class="text-h6">Commission Recipients</div>
+          <q-space></q-space>
+          <q-btn
+            color="primary"
+            icon="add"
+            label="Add Recipient"
+            @click="showAddRecipient = true"
+          ></q-btn>
+        </q-card-section>
+        
+        <q-card-section>
+          <recipient-list
+            :recipients="recipients"
+            :loading="loading"
+            @edit="editRecipient"
+            @delete="confirmDelete"
+          ></recipient-list>
+        </q-card-section>
+      </q-card>
+    </div>
+
+    <!-- Recent Distributions -->
+    <div class="col-12 col-md-6">
+      <q-card class="bg-marginal-bg">
+        <q-card-section class="row items-center">
+          <div class="text-h6">Recent Distributions</div>
+          <q-space></q-space>
+          <q-btn
+            color="primary"
+            icon="refresh"
+            label="Refresh"
+            :loading="loading"
+            @click="loadDistributions"
+          ></q-btn>
+        </q-card-section>
+        
+        <q-card-section>
+          <distribution-list
+            :distributions="distributions"
+            :loading="loading"
+          ></distribution-list>
+        </q-card-section>
+      </q-card>
+    </div>
+  </div>
+
+  <!-- Add/Edit Recipient Dialog -->
+  <q-dialog v-model="showAddRecipient">
+    <q-card style="min-width: 350px">
+      <q-card-section>
+        <div class="text-h6">{{ editingRecipient ? 'Edit Recipient' : 'Add New Recipient' }}</div>
+      </q-card-section>
+
+      <q-card-section>
+        <recipient-form
+          :recipient="editingRecipient"
+          :loading="saving"
+          @submit="saveRecipient"
+          @cancel="showAddRecipient = false"
+        ></recipient-form>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+
+  <!-- Delete Confirmation Dialog -->
+  <q-dialog v-model="showDeleteConfirm">
+    <q-card>
+      <q-card-section class="row items-center">
+        <q-avatar icon="warning" color="negative" text-color="white"></q-avatar>
+        <span class="q-ml-sm">Are you sure you want to delete this recipient?</span>
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn flat label="Cancel" color="primary" v-close-popup></q-btn>
+        <q-btn flat label="Delete" color="negative" @click="deleteRecipient"></q-btn>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+{% endblock %} 

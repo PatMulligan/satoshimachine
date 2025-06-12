@@ -1,0 +1,70 @@
+<q-table
+  :rows="transactions"
+  :columns="columns"
+  row-key="id"
+  :loading="loading"
+  :pagination.sync="pagination"
+  :rows-per-page-options="[10, 20, 50, 0]"
+  flat
+  bordered
+>
+  <!-- Status Column -->
+  <template v-slot:body-cell-status="props">
+    <q-td :props="props">
+      <q-chip
+        :color="getStatusColor(props.value)"
+        text-color="white"
+        dense
+      >
+        {{ props.value }}
+      </q-chip>
+    </q-td>
+  </template>
+
+  <!-- Amount Column -->
+  <template v-slot:body-cell-amount="props">
+    <q-td :props="props">
+      {{ formatAmount(props.value) }}
+    </q-td>
+  </template>
+
+  <!-- Actions Column -->
+  <template v-slot:body-cell-actions="props">
+    <q-td :props="props" class="q-gutter-x-sm">
+      <q-btn
+        flat
+        round
+        dense
+        color="primary"
+        icon="visibility"
+        @click="$emit('view', props.row)"
+      >
+        <q-tooltip>View Details</q-tooltip>
+      </q-btn>
+      
+      <q-btn
+        v-if="props.row.status === 'pending'"
+        flat
+        round
+        dense
+        color="positive"
+        icon="check"
+        @click="$emit('approve', props.row)"
+      >
+        <q-tooltip>Approve</q-tooltip>
+      </q-btn>
+      
+      <q-btn
+        v-if="props.row.status === 'pending'"
+        flat
+        round
+        dense
+        color="negative"
+        icon="close"
+        @click="$emit('reject', props.row)"
+      >
+        <q-tooltip>Reject</q-tooltip>
+      </q-btn>
+    </q-td>
+  </template>
+</q-table> 

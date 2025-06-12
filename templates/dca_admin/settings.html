@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+  {{ window_vars(user) }}
+  
+  <!-- Component templates -->
+  <template id="settings-form">
+    {% include("dca_admin/components/settings-form.html") %}
+  </template>
+  
+  <!-- App initialization -->
+  <script src="{{ static_url_for('dca_admin/static', 'js/settings.js') }}"></script>
+  
+  <!-- Component registrations -->
+  <script src="{{ static_url_for('dca_admin/static', 'js/components/settings-form.js') }}"></script>
+{% endblock %}
+
+{% block page %}
+  <div class="row q-col-gutter-md">
+    <!-- System Configuration -->
+    <div class="col-12 col-md-8">
+      <q-card class="bg-marginal-bg">
+        <q-card-section>
+          <div class="text-h6">System Configuration</div>
+        </q-card-section>
+        
+        <q-card-section>
+          <settings-form
+            :config="config"
+            :loading="loading"
+            @save="saveConfig"
+          ></settings-form>
+        </q-card-section>
+      </q-card>
+    </div>
+
+    <!-- System Status -->
+    <div class="col-12 col-md-4">
+      <q-card class="bg-marginal-bg">
+        <q-card-section>
+          <div class="text-h6">System Status</div>
+        </q-card-section>
+        
+        <q-card-section>
+          <q-list>
+            <q-item>
+              <q-item-section>
+                <q-item-label caption>Processing Status</q-item-label>
+                <q-item-label>
+                  <q-chip
+                    :color="config.processing_enabled ? 'positive' : 'negative'"
+                    text-color="white"
+                    dense
+                  >
+                    {{ config.processing_enabled ? 'Active' : 'Disabled' }}
+                  </q-chip>
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item>
+              <q-item-section>
+                <q-item-label caption>Lamassu Server</q-item-label>
+                <q-item-label>{{ config.lamassu_server_ip || 'Not configured' }}</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item>
+              <q-item-section>
+                <q-item-label caption>Fixed Mode Schedule</q-item-label>
+                <q-item-label>{{ config.fixed_mode_schedule }}</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item>
+              <q-item-section>
+                <q-item-label caption>Fixed Mode Time</q-item-label>
+                <q-item-label>{{ config.fixed_mode_time }}</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item>
+              <q-item-section>
+                <q-item-label caption>Max Daily Fixed Amount</q-item-label>
+                <q-item-label>{{ config.max_daily_fixed_amount }} GTQ</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+      </q-card>
+
+      <!-- Test Connection -->
+      <q-card class="bg-marginal-bg q-mt-md">
+        <q-card-section>
+          <div class="text-h6">Test Connection</div>
+        </q-card-section>
+        
+        <q-card-section>
+          <q-btn
+            color="primary"
+            label="Test Lamassu Connection"
+            :loading="testing"
+            @click="testConnection"
+            block
+          ></q-btn>
+        </q-card-section>
+      </q-card>
+    </div>
+  </div>
+{% endblock %} 

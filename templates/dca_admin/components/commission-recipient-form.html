@@ -1,0 +1,48 @@
+<q-form ref="form" @submit.prevent="onSubmit">
+  <q-input
+    v-model="form.name"
+    label="Recipient Name"
+    :rules="[val => !!val || 'Name is required']"
+    outlined
+    dense
+  ></q-input>
+
+  <q-input
+    v-model="form.wallet_id"
+    label="Wallet ID"
+    :rules="[val => !!val || 'Wallet ID is required']"
+    outlined
+    dense
+    class="q-mt-md"
+  ></q-input>
+
+  <q-input
+    v-model.number="form.percentage"
+    label="Commission Percentage"
+    type="number"
+    :rules="[
+      val => !!val || 'Percentage is required',
+      val => val >= 0 && val <= 100 || 'Percentage must be between 0 and 100'
+    ]"
+    outlined
+    dense
+    class="q-mt-md"
+  ></q-input>
+
+  <q-toggle
+    v-model="form.active"
+    label="Active"
+    color="primary"
+    class="q-mt-md"
+  ></q-toggle>
+
+  <!-- Submit Button -->
+  <div class="row justify-end q-mt-lg">
+    <q-btn
+      label="Save Recipient"
+      type="submit"
+      color="primary"
+      :loading="loading"
+    ></q-btn>
+  </div>
+</q-form> 
